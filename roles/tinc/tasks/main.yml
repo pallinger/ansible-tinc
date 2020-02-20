@@ -1,4 +1,6 @@
 ---
+- name: load distribution-specific variables
+  include_vars: "vars/{{ ansible_distribution }}.{{ ansible_lsb.major_release }}.yml"
 
 - name: install epel-release (redhat)
   yum: >
@@ -74,6 +76,18 @@
   notify:
     - restart tinc
 
+- name: ensure port is properly set in tinc host file
+  lineinfile: >
+    dest=/etc/tinc/{{ netname }}/hosts/{{ inventory_hostname }}
+    line="Port = {{ vpn_port }}"
+    create=yes
+  notify:
+    - restart tinc
+
+- name: ensure open vpn port
+  ufw: rule=allow port="{{ vpn_port }}"
+  when: firewall == 'ufw'
+
 - name: check whether /etc/tinc/netname/hosts/inventory_hostname contains "-----END RSA PUBLIC KEY-----"
   command: awk '/^-----END RSA PUBLIC KEY-----$/'  /etc/tinc/{{ netname }}/hosts/{{ inventory_hostname }}
   changed_when: "public_key.stdout != '-----END RSA PUBLIC KEY-----'"
@@ -111,12 +125,23 @@
 - name: run handlers
   meta: flush_handlers
 
+#- debug: msg="{{ ansible_distribution }}.{{ ansible_lsb.major_release }}"
+
 - name: ensure tinc is started
   service: >
     name=tinc
     enabled=yes
     state=started
     pattern=tincd -n {{ netname }}
+  when: ansible_distribution != 'Debian' or ansible_lsb.major_release != '10'
+
+- name: ensure tinc is started on new debian
+  service: >
+    name=tinc@{{ netname }}
+    enabled=yes
+    state=started
+    pattern=tincd -n {{ netname }}
+  when: ansible_distribution == 'Debian' and ansible_lsb.major_release == '10'
 
 - name: add nodes to /etc/hosts (ansible_inventory resolves to vpn_ip)
   lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ hostvars[item].vpn_ip }} {{item}}" state=present
