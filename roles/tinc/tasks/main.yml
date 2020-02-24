@@ -30,10 +30,17 @@
     recurse=True
     state=directory
 
-- name: create /etc/tinc/nets.boot file from template
-  template: >
-    src=nets.boot.j2
+#- name: create /etc/tinc/nets.boot file from template
+#  template: >
+#    src=nets.boot.j2
+#    dest=/etc/tinc/nets.boot
+#  notify:
+#    - restart tinc
+- name: ensure {{ netname }} is in /etc/tinc/nets.boot file
+  lineinfile: >
     dest=/etc/tinc/nets.boot
+    line="{{ netname }}"
+    mode=0644
   notify:
     - restart tinc
 

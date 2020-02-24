@@ -12,7 +12,16 @@
     path=/etc/tinc/{{ netname }}
     state=absent
 
-- name: delete nets.boot
-  file: >
-    path=/etc/tinc/nets.boot
+#- name: delete nets.boot
+#  file: >
+#    path=/etc/tinc/nets.boot
+#    state=absent
+
+- name: remove {{ netname }} from /etc/tinc/nets.boot file
+  lineinfile: >
+    dest=/etc/tinc/nets.boot
+    line="{{ netname }}"
+    mode=0644
     state=absent
+  notify:
+    - restart tinc
