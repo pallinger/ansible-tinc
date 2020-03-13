@@ -1,4 +1,7 @@
 ---
+- meta: end_play
+  when: vpn_ip is not defined
+
 - name: load distribution-specific variables
   include_vars: "vars/{{ ansible_distribution }}.{{ ansible_lsb.major_release }}.yml"
 
@@ -30,12 +33,6 @@
     recurse=True
     state=directory
 
-#- name: create /etc/tinc/nets.boot file from template
-#  template: >
-#    src=nets.boot.j2
-#    dest=/etc/tinc/nets.boot
-#  notify:
-#    - restart tinc
 - name: ensure {{ netname }} is in /etc/tinc/nets.boot file
   lineinfile: >
     dest=/etc/tinc/nets.boot
@@ -122,6 +119,11 @@
   notify:
     - reload tinc
 
+- name: install rsync ## this is necessary due to the synchronize target below
+  package: >
+    name=rsync
+    state=latest
+
 - name: sync the fetched tinc hosts files on each host
   synchronize: >
     src=fetch/
@@ -151,6 +153,6 @@
   when: ansible_distribution == 'Debian' and ansible_lsb.major_release == '10'
 
 - name: add nodes to /etc/hosts (ansible_inventory resolves to vpn_ip)
-  lineinfile: dest=/etc/hosts regexp='.*{{ item }}$' line="{{ hostvars[item].vpn_ip }} {{item}}" state=present
+  lineinfile: dest=/etc/hosts regexp='.* {{ hostvars[item].inventory_hostname }}.{{ netname }}.tinc$' line="{{ hostvars[item].vpn_ip }}   {{ hostvars[item].inventory_hostname }}.{{ netname }}.tinc" state=present
   when: hostvars[item].vpn_ip is defined
-  with_items: "{{ play_hosts }}"
+  with_items: "{{ groups['vpn'] }}"
