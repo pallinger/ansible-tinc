@@ -1,0 +1,4 @@
+This directory contains manually added tinc host files.
+These should be the hosts that are not installed using ansible, e.g. your desktops and laptops.
+These will be added to the hosts directory on every other server, but will not be connected to:
+they will need to initiate a connection to one of the others.

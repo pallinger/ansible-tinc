@@ -128,6 +128,16 @@
   synchronize: >
     src=fetch/
     dest=/etc/tinc/{{ netname }}/hosts/
+    rsync_opts="--exclude=*/"
+  notify:
+    - reload tinc
+
+- name: sync the predefined tinc hosts files
+  synchronize: >
+    src="{{ role_path }}/templates/hosts/"
+    dest=/etc/tinc/{{ netname }}/hosts/
+    rsync_opts="--exclude=.placeholder --exclude=*/"
+#    rsync_opts="--filter='+ [a-z]*' --filter='- *' --filter='- .??*'"
   notify:
     - reload tinc
 
