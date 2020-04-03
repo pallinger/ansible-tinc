@@ -132,12 +132,21 @@
   notify:
     - reload tinc
 
+- name: check whether there is a directory for predefined tinc hosts files
+  local_action: stat path="files/tinc_{{ netname }}_hosts/"
+  register: stat_predefined_tinc_hosts_files
+
+- debug: msg="{{ stat_predefined_tinc_hosts_files }}"
+
 - name: sync the predefined tinc hosts files
   synchronize: >
-    src="{{ role_path }}/templates/hosts/"
+    src="files/tinc_{{ netname }}_hosts/"
     dest=/etc/tinc/{{ netname }}/hosts/
     rsync_opts="--exclude=.placeholder --exclude=*/"
 #    rsync_opts="--filter='+ [a-z]*' --filter='- *' --filter='- .??*'"
+  when:
+    - stat_predefined_tinc_hosts_files.stat.isdir is defined
+    - stat_predefined_tinc_hosts_files.stat.isdir
   notify:
     - reload tinc
 
