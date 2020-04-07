@@ -137,7 +137,6 @@
     src="{{ role_path }}/templates/hosts/"
     dest=/etc/tinc/{{ netname }}/hosts/
     rsync_opts="--exclude=.placeholder --exclude=*/"
-#    rsync_opts="--filter='+ [a-z]*' --filter='- *' --filter='- .??*'"
   notify:
     - reload tinc
 
@@ -152,15 +151,16 @@
     enabled=yes
     state=started
     pattern=tincd -n {{ netname }}
-  when: ansible_distribution != 'Debian' or ansible_lsb.major_release != '10'
+  when: ansible_service_mgr != 'systemd' or ansible_distribution != 'Debian' or ansible_lsb.major_release < '9'
 
 - name: ensure tinc is started on new debian
   service: >
     name=tinc@{{ netname }}
     enabled=yes
     state=started
-    pattern=tincd -n {{ netname }}
-  when: ansible_distribution == 'Debian' and ansible_lsb.major_release == '10'
+  when:
+    - ansible_service_mgr == 'systemd'
+    - ansible_distribution != 'Debian' or ansible_lsb.major_release >= '9'
 
 - name: add nodes to /etc/hosts (ansible_inventory resolves to vpn_ip)
   lineinfile: dest=/etc/hosts regexp='.* {{ hostvars[item].inventory_hostname }}.{{ netname }}.tinc$' line="{{ hostvars[item].vpn_ip }}   {{ hostvars[item].inventory_hostname }}.{{ netname }}.tinc" state=present
