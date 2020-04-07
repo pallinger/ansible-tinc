@@ -10,3 +10,7 @@ vpn_subnet_cidr_netmask: 32
 
 firewall: none
 debian_version_name: unknown
+
+# By default, make a ConnectTo entry for all known hosts.
+# You may want to limit this to hosts that have a public IP address.
+tinc_connect_to: true
