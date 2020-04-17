@@ -136,7 +136,7 @@
   local_action: stat path="files/tinc_{{ netname }}_hosts/"
   register: stat_predefined_tinc_hosts_files
 
-- debug: msg="{{ stat_predefined_tinc_hosts_files }}"
+#- debug: msg="{{ stat_predefined_tinc_hosts_files }}"
 
 - name: sync the predefined tinc hosts files
   synchronize: >
