@@ -153,8 +153,6 @@
 - name: run handlers
   meta: flush_handlers
 
-#- debug: msg="{{ ansible_distribution }}.{{ ansible_lsb.major_release }}"
-
 - name: ensure tinc is started
   service: >
     name=tinc
@@ -163,6 +161,8 @@
     pattern=tincd -n {{ netname }}
   when: ansible_service_mgr != 'systemd' or ansible_distribution != 'Debian' or ansible_lsb.major_release < '9'
 
+#- debug: msg="{{ ansible_distribution }}.{{ ansible_lsb.major_release }} {{ ansible_service_mgr }} tinc@{{ netname }}"
+
 - name: ensure tinc is started on new debian
   service: >
     name=tinc@{{ netname }}
@@ -170,7 +170,7 @@
     state=started
   when:
     - ansible_service_mgr == 'systemd'
-    - ansible_distribution != 'Debian' or ansible_lsb.major_release >= '9'
+    - ansible_distribution != 'Debian' or ansible_lsb.major_release >= 9
 
 - name: add nodes to /etc/hosts (ansible_inventory resolves to vpn_ip)
   lineinfile: dest=/etc/hosts regexp='.* {{ hostvars[item].inventory_hostname }}.{{ netname }}.tinc$' line="{{ hostvars[item].vpn_ip }}   {{ hostvars[item].inventory_hostname }}.{{ netname }}.tinc" state=present
