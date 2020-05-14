@@ -116,3 +116,7 @@ Note that removing hosts from the VPN will result in orphaned tinc hosts files a
 ## Running Multiple VPNs
 
 This playbook does not support multiple VPNs but it could be easily extended.
+
+## Renaming VPNs
+
+If you try to rename a VPN, you must remove the previous network, or the old service will hog the port and the tun device!
