@@ -1,16 +1,22 @@
 # Introduction
 
-The primary purpose of this playbook is to secure the private network of DigitalOcean Droplets with tinc VPN. You can use it with any Ubuntu servers that can reach each other over a network.
+The original purpose of this playbook is to secure the private network of DigitalOcean Droplets with tinc VPN.
+I use it to create an administrative network for all department machines that run behind various NATs.
+
+You can use it with any Ubuntu servers that can reach each other over a network. 
+Or if there is at least one server with a public IP address, then you can connect arbitrary amount of subnets.
 
 This sets up a tinc VPN between several servers. It also adds /etc/hosts entries for the inventory hostnames to resolve to the VPN IP addresses.
 
 ## Prerequisites
 
-This playbook been tested on Ubuntu 14.04 and CentOS 7 servers.
+The original playbook has been tested on Ubuntu 14.04 and CentOS 7 servers.
+The new version was tested on Ubuntu 12.04, 14.04 and Debian 6-10. I hope I did not break CentOS compatibility, but testing and pull requests are welcome.
 
 Your local machine (where Ansible is installed) must be able to log in to the remote servers as "root", preferably with passwordless public SSH key, which is specified as the `remote_user` in `/ansible.cfg`. Due to a [bug with the Ansible Synchronize module](https://github.com/ansible/ansible/issues/13825), it is not possible to use a different `remote_user` at this time.
 
-By default, this playbook will bind tinc to the IP address on the `eth1` interface (private network interface on DigitalOcean Droplets). See the "Review Group Variables" section to change this.
+By default, this playbook will bind tinc to the IP address on the `eth1` interface (private network interface on DigitalOcean Droplets). See the "Review Group Variables" section to change this. 
+It seems quite good in figuring out an IP address if there is no eth1 present, though.
 
 ## Preparation
 
@@ -43,10 +49,12 @@ The `/group_vars/all` file contains a few values that you may want to modify.
 - `physical_ip` specifies which IP address you want tinc to bind to, based on network interface name. It is set to `eth1` (ansible_eth1) by default. On DigitalOcean, `eth1` is the private network interface so *Private Networking* must be enabled unless you would rather use the public network interface (`eth0`)
 - `netname` specifies the tinc netname. It's set to `nyc3` by default.
 - `vpn_netmask` specifies the netmask that the will be applied to the VPN interface. By default, it's set to `255.255.255.0`, which means that each `vpn_ip` is a Class C address which can only communicate with other hosts within the same subnet. For example, a `10.0.0.x` will not be able to communicate with a `10.0.1.x` host unless the subnet is enlarged by changing `vpn_netmask` to something like `255.255.0.0`.
+- `firewall` specifies the firewall type on the host. Currently tinc port is opened only if `ufw` is set. Default is none.
 
 The other variables probably don't need to be modified.
 
 - `vpn_interface` is the virtual network interface that tinc will use. It is `tun0` by default.
+- `tinc_connect_to` specifies whether the given host will be added to the ConnectTo list. This defaults to true, but you may want to change disable it for some groups of hosts. Implementing this feature seemed necessary as tinc start became really sluggish with 50+ connected hosts.
 
 ## Set Up Tinc
 
@@ -69,7 +77,7 @@ ping 10.0.0.2
 Or, assuming one of your hosts is named `prod02`, run this:
 
 ```bash
-ping prod02
+ping prod02.{{ netname }}.tinc
 ```
 
 Feel free to test the other nodes.
@@ -113,10 +121,15 @@ This will stop Tinc and delete the Tinc configuration and host key files from th
 
 Note that removing hosts from the VPN will result in orphaned tinc hosts files and /etc/hosts entries on the remaining VPN members. This should not affect anything unless you later add new servers to the VPN but reuse the decommissioned names. Delete the appropriate `/etc/hosts` entries on each server, if this is a problem for you.
 
+## Adding hosts not managed by ansible
+
+You can add hosts not managed by ansible (e.g. desktops/laptops of colleagues) by creating host files for them and 
+copying them to the `files/tinc_{{ netname }}_hosts/` directory. These hosts will not appear in the ConnectTo list.
+
 ## Running Multiple VPNs
 
 This playbook does not support multiple VPNs but it could be easily extended.
 
 ## Renaming VPNs
 
-If you try to rename a VPN, you must remove the previous network, or the old service will hog the port and the tun device!
+If you try to rename a VPN, you must remove the previous network first, or the old service will hog the port and the tun device!
