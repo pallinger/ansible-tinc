@@ -135,6 +135,7 @@
 - name: check whether there is a directory for predefined tinc hosts files
   local_action: stat path="files/tinc_{{ netname }}_hosts/"
   register: stat_predefined_tinc_hosts_files
+  run_once: true
 
 #- debug: msg="{{ stat_predefined_tinc_hosts_files }}"
 
