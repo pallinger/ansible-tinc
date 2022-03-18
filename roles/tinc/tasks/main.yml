@@ -125,7 +125,7 @@
 - name: fetch tinc hosts file after key creation
   fetch: >
     src=/etc/tinc/{{ netname }}/hosts/{{ inventory_hostname }}
-    dest=fetch/{{ inventory_hostname }}
+    dest=fetch/tinc_{{ netname }}_keys/{{ inventory_hostname }}
     flat=yes
   notify:
     - reload tinc
@@ -137,7 +137,7 @@
 
 - name: sync the fetched tinc hosts files on each host
   synchronize: >
-    src=fetch/
+    src=fetch/tinc_{{ netname }}_keys/
     dest=/etc/tinc/{{ netname }}/hosts/
     rsync_opts="--exclude=*/"
   notify:
