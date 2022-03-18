@@ -1,5 +1,5 @@
 netname: vpn0
-vpn_interface: {{ netname }}
+vpn_interface: "{{ netname }}"
 physical_ip: "{{ ansible_facts['default_ipv4']['address'] }}" # public interface
 
 vpn_netmask: 255.255.255.0
