@@ -11,6 +11,12 @@
     state=latest
   when: (ansible_os_family == "RedHat" and ansible_distribution_major_version == "7")
 
+- name: install net-tools on Debian/Ubuntu
+  package: >
+    name=net-tools
+    state=latest
+  when: ansible_os_family == "Debian"
+
 - name: install tinc
   package: >
     name=tinc
