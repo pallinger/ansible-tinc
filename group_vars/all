@@ -1,15 +1,14 @@
----
-
-netname: nyc3
-physical_ip: "{{ ansible_eth1.ipv4.address }}"
-
-vpn_interface: tun0
+netname: vpn0
+vpn_interface: "{{ netname }}"
+physical_ip: "{{ ansible_facts['default_ipv4']['address'] }}" # public interface
 
 vpn_netmask: 255.255.255.0
 vpn_subnet_cidr_netmask: 32
+vpn_port: "655"
 
+# If you define 'ufw' for this variable, the vpn_port will be opened on the ufw firewall
 firewall: none
 
-# By default, make a ConnectTo entry for all known hosts.
-# You may want to limit this to hosts that have a public IP address.
+# By default, a ConnectTo entry will be made for all known hosts.
+# You may want to limit this to hosts that have a public IP address, so override this for select host groups.
 tinc_connect_to: true
