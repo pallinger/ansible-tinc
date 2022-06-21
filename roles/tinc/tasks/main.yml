@@ -185,7 +185,41 @@
     - ansible_service_mgr == 'systemd'
     - ansible_distribution != 'Debian' or ansible_distribution_major_version != '8'  # debian 8 may use systemd, but it is used differently
 
-- name: add nodes to /etc/hosts (ansible_inventory resolves to vpn_ip)
-  lineinfile: dest=/etc/hosts regexp='.* {{ hostvars[item].inventory_hostname }}.{{ netname }}.tinc$' line="{{ hostvars[item].vpn_ip }}   {{ hostvars[item].inventory_hostname }}.{{ netname }}.tinc" state=present
+## hosts file creation
+## this was needed because the old lineinfile method was O(n^2) steps and thus _very slow_ for many hosts
+
+- name: create local hosts cache file to collect addresses in
+  local_action: file dest=fetch/hosts state=touch access_time=preserve modification_time=preserve
+  run_once: true
+  tags: hosts
+
+- name: add vpn addresses to hosts cache file (ansible_inventory resolves to vpn_ip)
+  local_action: lineinfile dest=fetch/hosts regexp='.* {{ hostvars[item].inventory_hostname }}.{{ netname }}.tinc$' line="{{ hostvars[item].vpn_ip }}   {{ hostvars[item].inventory_hostname }}.{{ netname }}.tinc" state=present
+  run_once: true
   when: hostvars[item].vpn_ip is defined
   with_items: "{{ groups['vpn'] }}"
+  register: hosts_file
+  tags: hosts
+
+- name: add local addresses to hosts file if local suffix defined
+  local_action: lineinfile dest=fetch/hosts regexp='.* {{ hostvars[item].ansible_host }}.{{ local_net_suffix }}$' line="{{ hostvars[item].ansible_host }}   {{ hostvars[item].inventory_hostname }}.{{ local_net_suffix }}" state=present
+  run_once: true
+  when:
+    - local_net_suffix is defined
+    - hostvars[item].ansible_host is defined
+    - "'public_ip' not in hostvars[item].group_names"
+  with_items: "{{ groups['vpn'] }}"
+  tags: hosts
+
+- name: sort hosts file
+  local_action: shell sort -V fetch/hosts > fetch/hosts.sort && mv fetch/hosts.sort fetch/hosts
+  run_once: true
+  when: hosts_file.changed
+  tags: hosts
+
+- name: merge new hosts file to all machines
+  blockinfile:
+    block: "{{ lookup('file', 'fetch/hosts') }}"
+    marker: "# DSD ANSIBLE ENTRIES {mark}"
+    path: /etc/hosts
+  tags: hosts
