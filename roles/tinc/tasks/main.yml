@@ -220,6 +220,6 @@
 - name: merge new hosts file to all machines
   blockinfile:
     block: "{{ lookup('file', 'fetch/hosts') }}"
-    marker: "# DSD ANSIBLE ENTRIES {mark}"
+    marker: "# {{ netname }} ANSIBLE ENTRIES {mark}"
     path: /etc/hosts
   tags: hosts
