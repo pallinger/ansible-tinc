@@ -3,7 +3,7 @@
 The original purpose of this playbook is to secure the private network of DigitalOcean Droplets with tinc VPN.
 I use it to create an administrative network for all department machines that run behind various NATs.
 
-You can use it with any Ubuntu servers that can reach each other over a network. 
+You can use it with any Ubuntu, Debian or CentOS servers that can reach each other over a network. 
 Or if there is at least one server with a public IP address, then you can connect arbitrary amount of subnets.
 
 This sets up a tinc VPN between several servers. It also adds /etc/hosts entries for the inventory hostnames to resolve to the VPN IP addresses.
@@ -11,7 +11,7 @@ This sets up a tinc VPN between several servers. It also adds /etc/hosts entries
 ## Prerequisites
 
 The original playbook has been tested on Ubuntu 14.04 and CentOS 7 servers.
-The new version was tested on Ubuntu 12.04, 14.04 and Debian 6-10. I hope I did not break CentOS compatibility, but testing and pull requests are welcome.
+The new version was tested on Ubuntu 12.04, 14.04 and Debian 6-12. I hope I did not break CentOS compatibility, but testing and pull requests are welcome.
 
 Your local machine (where Ansible is installed) must be able to log in to the remote servers as "root", preferably with passwordless public SSH key, which is specified as the `remote_user` in `/ansible.cfg`. Due to a [bug with the Ansible Synchronize module](https://github.com/ansible/ansible/issues/13825), it is not possible to use a different `remote_user` at this time.
 
