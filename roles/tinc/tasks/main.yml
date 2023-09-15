@@ -170,7 +170,7 @@
     name=tinc
     enabled=yes
     state=started
-    pattern=tincd -n {{ netname }}
+    pattern='tincd -n {{ netname }}'
   when: ansible_service_mgr != 'systemd' or ansible_distribution != 'Debian' or ansible_distribution_major_version < '9'
 
 - debug: msg="{{ ansible_distribution }}.{{ ansible_distribution_major_version }} {{ ansible_service_mgr }} tinc@{{ netname }} {{ vpn_port }}"
