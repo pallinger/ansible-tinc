@@ -223,3 +223,12 @@
     marker: "# {{ netname }} ANSIBLE ENTRIES {mark}"
     path: /etc/hosts
   tags: hosts
+
+- name: restart dnsmasq server if configured
+  service:
+    name: dnsmasq
+    state: restarted
+  run_once: true
+  delegate_to: "{{ dnsmasq_host }}"
+  when: dnsmasq_host is defined
+  tags: hosts
