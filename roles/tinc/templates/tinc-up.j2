@@ -1,2 +1,5 @@
 #!/bin/sh
 ifconfig $INTERFACE {{ vpn_ip }} netmask {{ vpn_netmask }}
+
+cd `dirname $0`
+[ -x post-up ] && ./post-up
