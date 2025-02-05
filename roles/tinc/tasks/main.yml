@@ -129,6 +129,7 @@
     flat=yes
   notify:
     - reload tinc
+  tags: fetch
 
 - name: install rsync ## this is necessary due to the synchronize target below
   package: >
