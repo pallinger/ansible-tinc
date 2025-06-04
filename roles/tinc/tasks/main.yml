@@ -233,3 +233,20 @@
   delegate_to: "{{ dnsmasq_host }}"
   when: dnsmasq_host is defined
   tags: hosts
+
+- name: check if tinc_supervisor.sh present
+  stat:
+    path: /usr/local/sbin/tinc_supervisor.sh
+  register: supervisor_script
+  tags: supervisor  
+
+- name: schedule tinc_supervisor.sh script hourly if present
+  cron:
+    name: "run tinc_supervisor.sh"
+    cron_file: "ansible"
+    user: root
+    minute: "0"
+    job: "/usr/local/sbin/tinc_supervisor.sh"
+    backup: yes
+  when: supervisor_script.stat.exists
+  tags: supervisor
