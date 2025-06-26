@@ -246,7 +246,7 @@
     cron_file: "ansible"
     user: root
     minute: "0"
-    job: "/usr/local/sbin/tinc_supervisor.sh"
+    job: "/usr/local/sbin/tinc_supervisor.sh >> /var/log/tinc_supervisor.log"
     backup: yes
   when: supervisor_script.stat.exists
   tags: supervisor
