@@ -16,12 +16,12 @@
   tags: hosts
 
 - name: add pseudo vpn addresses to hosts cache file (ansible_inventory resolves to vpn_ip) if only routed from the tinc/openvpn networks
-  local_action: lineinfile dest=fetch/hosts regexp='.* {{ hostvars[item].inventory_hostname }}.{{ netname }}.tinc$' line="{{ hostvars[item].ansible_host }}   {{ hostvars[item].inventory_hostname }}.tinc" state=present
+  local_action: lineinfile dest=fetch/hosts regexp='.* {{ hostvars[item].inventory_hostname }}.{{ netname }}.tinc$' line="{{ hostvars[item].ansible_host }}   {{ hostvars[item].inventory_hostname }}.{{ netname }}.tinc" state=present
   run_once: true
   when: hostvars[item].vpn_ip is not defined and vpn_routable is defined and vpn_routable
   with_items: "{{ groups['vpn'] }}"
   register: hosts_file
-  tags: hosts
+  tags: hosts, pseudovpn
 
 - name: add local addresses to hosts file if local suffix defined
   local_action: lineinfile dest=fetch/hosts regexp='.* {{ hostvars[item].ansible_host }}.{{ local_net_suffix }}$' line="{{ hostvars[item].ansible_host }}   {{ hostvars[item].inventory_hostname }}.{{ local_net_suffix }}" state=present
@@ -44,7 +44,7 @@
     block: "{{ lookup('file', 'fetch/hosts') }}"
     marker: "# {{ netname }} ANSIBLE ENTRIES {mark}"
     path: /etc/hosts
-  tags: hosts
+  tags: hosts, hosts_merge, hosts_send
 
 - name: restart dnsmasq server if configured
   service:
