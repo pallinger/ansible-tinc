@@ -1,21 +1,10 @@
 ---
 
-- name: stop and disable tinc
-  service: >
-    name=tinc
-    enabled=no
-    state=stopped
-    pattern=tincd -n {{ netname }}
-
 - name: delete tinc netname directory
   file: >
     path=/etc/tinc/{{ netname }}
     state=absent
-
-#- name: delete nets.boot
-#  file: >
-#    path=/etc/tinc/nets.boot
-#    state=absent
+  tags: delete_tinc_config
 
 - name: remove {{ netname }} from /etc/tinc/nets.boot file
   lineinfile: >
@@ -25,3 +14,18 @@
     state=absent
   notify:
     - restart tinc
+  tags: delete_tinc_config
+
+- name: read /etc/tinc/nets.boot
+  ansible.builtin.shell:
+    cmd: "grep -v '^#' /etc/tinc/nets.boot | wc -l"
+  register: nets_boot
+  changed_when: false
+  tags: slurp
+
+- name: remove tinc package if /etc/tinc/nets.boot is empty
+  package:
+    name: tinc
+    state: absent
+  when: nets_boot.stdout | int == 0
+  tags: package
