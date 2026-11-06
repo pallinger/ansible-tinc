@@ -29,3 +29,7 @@
     state: absent
   when: nets_boot.stdout | int == 0
   tags: package
+
+- name: end role for host if /etc/tinc/nets.boot is empty to avoid tinc restart handler to fail
+  meta: end_host
+  when: nets_boot.stdout | int == 0
