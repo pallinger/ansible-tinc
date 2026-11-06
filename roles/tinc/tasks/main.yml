@@ -200,6 +200,7 @@
     rsync_opts="--exclude=*/"
   notify:
     - reload tinc
+  tags: sync
 
 - name: check whether there is a directory for predefined tinc hosts files
   local_action: stat path="files/tinc_{{ netname }}_hosts/"
