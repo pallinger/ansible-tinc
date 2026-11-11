@@ -95,11 +95,13 @@
     path=/etc/tinc/{{ netname }}/hosts
     recurse=True
     state=directory
+  tags: config
 
 - name: ensure /etc/tinc/nets.boot exists
   file: >
     path=/etc/tinc/nets.boot
     state=touch
+  tags: config
 
 - name: ensure {{ netname }} is in /etc/tinc/nets.boot file
   lineinfile: >
@@ -108,6 +110,7 @@
     mode=0644
   notify:
     - restart tinc
+  tags: config
 
 - name: ensure tinc.conf contains connection to all other nodes
   template: >
@@ -115,6 +118,7 @@
     dest=/etc/tinc/{{ netname }}/tinc.conf
   notify:
     - reload tinc
+  tags: conf, config
 
 - name: create tinc-up file
   template: >
@@ -123,6 +127,7 @@
     mode=0755
   notify:
     - restart tinc
+  tags: config
 
 - name: create tinc-down file
   template: >
@@ -131,6 +136,7 @@
     mode=0755
   notify:
     - restart tinc
+  tags: config
 
 - name: ensure tinc hosts file binds to physical ip address
   lineinfile: >
@@ -139,6 +145,7 @@
     create=yes
   notify:
     - restart tinc
+  tags: config
 
 - name: ensure subnet ip address is properly set in tinc host file
   lineinfile: >
@@ -147,6 +154,7 @@
     create=yes
   notify:
     - restart tinc
+  tags: config
 
 - name: ensure port is properly set in tinc host file
   lineinfile: >
@@ -155,6 +163,7 @@
     create=yes
   notify:
     - restart tinc
+  tags: config
 
 - name: ensure open vpn port
   ufw: rule=allow port="{{ vpn_port }}"
