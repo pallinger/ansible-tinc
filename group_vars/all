@@ -12,3 +12,6 @@ firewall: none
 # By default, a ConnectTo entry will be made for all known hosts.
 # You may want to limit this to hosts that have a public IP address, so override this for select host groups.
 tinc_connect_to: true
+
+# This is needed if you need e.g. extra routing for some sets of hosts
+tinc_up_extra_commands: ''

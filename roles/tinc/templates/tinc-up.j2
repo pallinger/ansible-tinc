@@ -1,5 +1,6 @@
 #!/bin/sh
 ifconfig $INTERFACE {{ vpn_ip }} netmask {{ vpn_netmask }}
+{{ tinc_up_extra_commands }}
 
 cd `dirname $0`
 [ -x post-up ] && ./post-up
